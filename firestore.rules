@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Primitives
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 64 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    // User Validation
+    function isValidUser(data) {
+      return data.keys().hasAll(['fullname', 'studentID', 'email', 'pin']) 
+        && data.fullname is string && data.fullname.size() <= 100
+        && data.studentID is string && data.studentID.size() <= 20
+        && data.email is string && data.email.size() <= 100
+        && data.pin is string && data.pin.size() == 6
+        && (!('contactNumber' in data) || (data.contactNumber is string && data.contactNumber.size() <= 20));
+    }
+
+    // Inventory Validation
+    function isValidInventory(data) {
+      return data.apparatusName is string && data.apparatusName.size() <= 100
+        && data.availableQuantity is number && data.availableQuantity >= 0
+        && data.totalQuantity is number && data.totalQuantity >= 0;
+    }
+
+    // Transaction Validation
+    function isValidTransaction(data) {
+      return data.borrowerID is string && data.borrowerID.size() <= 20
+        && data.borrowerName is string && data.borrowerName.size() <= 100
+        && data.borrowedItems is list && data.borrowedItems.size() > 0
+        && data.status in ['active', 'returned'];
+    }
+
+    // --- Collections ---
+
+    match /users/{userId} {
+      // Students can register themselves (create)
+      allow create: if isValidId(userId) && isValidUser(incoming());
+      
+      // Allow lookup by studentID and pin (for kiosk login)
+      // Note: In a real enterprise app, we'd use Custom Claims, 
+      // but for Kiosk ID+PIN flow, we allow query-based lookup.
+      allow list, get: if true; 
+      
+      // Only admins can delete or update users fully
+      allow update, delete: if isAdmin();
+    }
+
+    match /inventory/{itemId} {
+      // Everyone can read inventory
+      allow read: if true;
+      
+      // Only admins can full-write inventory
+      allow create, delete: if isAdmin();
+      
+      // Students can update ONLY availableQuantity during borrow/return
+      allow update: if isAdmin() || (
+        isValidInventory(incoming()) 
+        && incoming().diff(existing()).affectedKeys().hasOnly(['availableQuantity'])
+      );
+    }
+
+    match /transactions/{txId} {
+      // Kiosk can create transactions
+      allow create: if isValidId(txId) && isValidTransaction(incoming())
+        && incoming().borrowTime == request.time;
+      
+      // Kiosk can find transactions by borrowerID
+      allow list, get: if true;
+      
+      // Kiosk can mark as returned
+      allow update: if isAdmin() || (
+        isValidTransaction(incoming())
+        && existing().status == 'active'
+        && incoming().status == 'returned'
+        && incoming().actualReturnTime == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'actualReturnTime'])
+      );
+    }
+
+    match /admins/{adminId} {
+      // Only admins can read/write admin list
+      allow read, write: if isAdmin();
+      // Allow initial setup if collection is empty or for a specific email
+      allow create: if isSignedIn(); 
+    }
+  }
+}

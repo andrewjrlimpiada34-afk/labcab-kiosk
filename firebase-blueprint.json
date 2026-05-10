@@ -1,0 +1,87 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Student registered in the system",
+      "type": "object",
+      "properties": {
+        "fullname": { "type": "string" },
+        "studentID": { "type": "string" },
+        "course": { "type": "string" },
+        "yearLevel": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "contactNumber": { "type": "string" },
+        "qrCode": { "type": "string" },
+        "pin": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fullname", "studentID", "email", "pin"]
+    },
+    "InventoryItem": {
+      "title": "Inventory Item",
+      "description": "Laboratory apparatus available for borrowing",
+      "type": "object",
+      "properties": {
+        "apparatusName": { "type": "string" },
+        "availableQuantity": { "type": "number" },
+        "totalQuantity": { "type": "number" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["apparatusName", "availableQuantity", "totalQuantity"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Record of a borrowing session",
+      "type": "object",
+      "properties": {
+        "borrowerID": { "type": "string" },
+        "borrowerName": { "type": "string" },
+        "borrowedItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "itemId": { "type": "string" },
+              "name": { "type": "string" },
+              "quantity": { "type": "number" }
+            }
+          }
+        },
+        "borrowTime": { "type": "string", "format": "date-time" },
+        "returnDeadline": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "returned"] },
+        "actualReturnTime": { "type": "string", "format": "date-time" }
+      },
+      "required": ["borrowerID", "borrowedItems", "borrowTime", "returnDeadline", "status"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Administrator with system access",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin", "superadmin"] }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "users": {
+      "schema": "User",
+      "description": "Collecton of registered students"
+    },
+    "inventory": {
+      "schema": "InventoryItem",
+      "description": "Collection of laboratory apparatus"
+    },
+    "transactions": {
+      "schema": "Transaction",
+      "description": "Collection of borrow/return transactions"
+    },
+    "admins": {
+      "schema": "Admin",
+      "description": "Collection of system administrators"
+    }
+  }
+}

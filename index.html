@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Google AI Studio App</title>
+    <script>
+      (function() {
+        var fix = function(key) {
+          var val = "{}";
+          try {
+            if (window[key] && window[key] !== "undefined") val = window[key];
+            Object.defineProperty(window, key, {
+              get: function() { return val; },
+              set: function(v) { if (v !== "undefined") val = v; },
+              configurable: true
+            });
+          } catch (e) {
+            window[key] = "{}";
+          }
+        };
+        fix("__FIREBASE_DEFAULTS__");
+        fix("FIREBASE_CONFIG");
+        
+        // Also clear out possible "undefined" strings from cookie
+        try {
+          if (document.cookie.indexOf("__FIREBASE_DEFAULTS__=undefined") !== -1) {
+            document.cookie = "__FIREBASE_DEFAULTS__=%7B%7D; path=/; sameSite=lax";
+          }
+        } catch(e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

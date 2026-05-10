@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-brand-primary: #4f46e5; /* indigo-600 */
+  --color-brand-secondary: #0f172a; /* slate-900 */
+  --color-brand-accent: #10b981;
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-slate-50 text-slate-800 overflow-hidden;
+  }
+}
+
+.glass-card {
+  @apply bg-white/80 backdrop-blur-md border border-slate-200 shadow-xl rounded-[2rem];
+}
+
+.kiosk-card {
+  @apply bg-white border border-slate-200 rounded-[2rem] shadow-xl transition-all duration-300;
+}
+
+.kiosk-btn {
+  @apply relative overflow-hidden transition-all duration-300 active:scale-95;
+}
+
+.gradient-blue {
+  @apply bg-gradient-to-r from-blue-600 to-indigo-600;
+}
+
+.gradient-green {
+  @apply bg-gradient-to-r from-emerald-600 to-teal-600;
+}
+
+.gradient-orange {
+  @apply bg-gradient-to-r from-orange-600 to-rose-600;
+}
+
+.nav-shadow {
+  @apply shadow-[0_1px_2px_0_rgba(0,0,0,0.05)];
+}
+

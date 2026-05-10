@@ -1,0 +1,6 @@
+{
+  "name": "LabCab",
+  "description": "Smart Laboratory Cabinet Kiosk System for laboratory apparatus borrowing and returning.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": []
+}

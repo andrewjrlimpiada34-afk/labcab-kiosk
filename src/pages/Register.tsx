@@ -45,9 +45,14 @@ const Register: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (!db) {
+      setError('Firebase not configured. Please check .env.local (VITE_FIREBASE_*).');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
+
       // Check if student ID already exists
       const q = query(collection(db, 'users'), where('studentID', '==', formData.studentID));
       const querySnapshot = await getDocs(q);

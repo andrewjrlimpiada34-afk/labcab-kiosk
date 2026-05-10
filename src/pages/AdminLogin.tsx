@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { auth, db } from '../lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { motion } from 'motion/react';
-import { ShieldCheck, Mail, Lock, ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
+import { ShieldCheck, Mail, Lock, ArrowLeft, AlertCircle } from 'lucide-react';
 import LoadingOverlay from '../components/LoadingOverlay';
 
 const AdminLogin: React.FC = () => {
@@ -19,16 +19,21 @@ const AdminLogin: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      // 1. Auth Login
+      if (!auth || !db) {
+        setError('Firebase is not configured. Check VITE_FIREBASE_* env vars.');
+        return;
+      }
+
+      // 1) Auth Login
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      
-      // 2. Check if user is in admins collection
-      const q = query(collection(db, 'admins'), where('email', '==', email));
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty && email !== 'admin@labcab.com') { // Hardcoded fallback for first run
+
+      // 2) Check if user is admin by matching your Firestore rules:
+      // firestore.rules: isAdmin() => exists(admins/{request.auth.uid})
+      const uid = userCredential.user.uid;
+      const adminDoc = await getDoc(doc(db, 'admins', uid));
+
+      if (!adminDoc.exists()) {
         setError('Access denied. You are not registered as an administrator.');
-        setLoading(false);
         return;
       }
 

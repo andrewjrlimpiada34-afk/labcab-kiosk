@@ -45,40 +45,57 @@ const firebaseConfig = {
   appId: viteEnv.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase App
-const app = initializeApp(firebaseConfig as any);
+const missingRequiredEnv = missingKeys.length > 0;
+
+// Initialize Firebase App (only if env is valid)
+let app: ReturnType<typeof initializeApp> | null = null;
 
 // Optional Firestore Database ID
 const firestoreDatabaseId = viteEnv.VITE_FIRESTORE_DATABASE_ID;
 
-// Initialize Firestore
-export const db = firestoreDatabaseId
-  ? getFirestore(app, firestoreDatabaseId)
-  : getFirestore(app);
+// Initialize Firestore/Auth/Storage (safe exports)
+export const db = (() => {
+  if (missingRequiredEnv) return null;
+  app = initializeApp(firebaseConfig as any);
+  return firestoreDatabaseId ? getFirestore(app, firestoreDatabaseId) : getFirestore(app);
+})();
 
-// Initialize Firebase Services
-export const auth = getAuth(app);
-export const storage = getStorage(app);
+export const auth = (() => {
+  if (missingRequiredEnv) return null;
+  // app should have been created in db initializer
+  return getAuth(app as any);
+})();
+
+export const storage = (() => {
+  if (missingRequiredEnv) return null;
+  return getStorage(app as any);
+})();
+
+// Default export: app (may be null)
+// ---- NOTE ----
+// This prevents confusing runtime errors like: "undefined" is not valid JSON
+// when Firebase SDK attempts to parse/serialize config-dependent values.
 
 // Connectivity Test
+
 // Avoid eager network calls on import; OAuth/domain errors will show up in console anyway,
 // but this keeps the app usable even if Firestore rules/network are temporarily misconfigured.
 export async function testFirebaseConnection() {
   try {
+    if (!db) {
+      console.error('[firebase] Skipping connection test: Firebase is not initialized (missing env vars).');
+      return;
+    }
     await getDocFromServer(doc(db, 'test', 'connection'));
     console.log('Firebase connected successfully.');
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message.includes('the client is offline')
-    ) {
-      console.error(
-        'Please check your Firebase configuration or internet connection.'
-      );
+    if (error instanceof Error && error.message.includes('the client is offline')) {
+      console.error('Please check your Firebase configuration or internet connection.');
     } else {
       console.error('Firebase connection error:', error);
     }
   }
 }
 
-export default app;
+
+

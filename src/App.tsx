@@ -18,6 +18,7 @@ import ReturnConfirm from './pages/ReturnConfirm';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import { AnimatePresence, motion } from 'motion/react';
+import React from 'react';
 
 function KioskContent() {
   const { view } = useApp();
@@ -41,9 +42,9 @@ function KioskContent() {
   };
 
   return (
-    <div className="flex flex-col h-screen select-none">
+    <div className="flex flex-col h-[100dvh] max-h-[100vh] w-screen select-none">
       {view !== 'admin-dashboard' && view !== 'admin-login' && <Navbar />}
-      <main className="flex-1 overflow-hidden relative flex flex-col">
+      <main className="flex-1 overflow-hidden relative flex flex-col min-h-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={view}
@@ -51,7 +52,7 @@ function KioskContent() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="flex-1 flex flex-col"
+            className="flex-1 flex flex-col min-h-0"
           >
             {renderView()}
           </motion.div>

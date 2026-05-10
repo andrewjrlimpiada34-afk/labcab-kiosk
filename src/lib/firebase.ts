@@ -3,21 +3,26 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
+type ViteEnv = Record<string, string | undefined>;
+
+// Vite exposes env at import.meta.env; TypeScript needs a hint for this project.
+const viteEnv = (import.meta as any).env as ViteEnv;
+
 // Firebase configuration from Vercel / .env.local
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: viteEnv.VITE_FIREBASE_API_KEY,
+  authDomain: viteEnv.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: viteEnv.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: viteEnv.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: viteEnv.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: viteEnv.VITE_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase App
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig as any);
 
 // Optional Firestore Database ID
-const firestoreDatabaseId = import.meta.env.VITE_FIRESTORE_DATABASE_ID;
+const firestoreDatabaseId = viteEnv.VITE_FIRESTORE_DATABASE_ID;
 
 // Initialize Firestore
 export const db = firestoreDatabaseId

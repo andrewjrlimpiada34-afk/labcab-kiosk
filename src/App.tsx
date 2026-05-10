@@ -42,9 +42,9 @@ function KioskContent() {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] max-h-[100vh] w-screen select-none">
+    <div className="flex flex-col min-h-screen w-screen select-none">
       {view !== 'admin-dashboard' && view !== 'admin-login' && <Navbar />}
-      <main className="flex-1 overflow-hidden relative flex flex-col min-h-0">
+      <main className="flex-1 min-h-0 overflow-hidden relative flex flex-col">
         <AnimatePresence mode="wait">
           <motion.div
             key={view}

@@ -24,6 +24,10 @@ const PINPad: React.FC<PINPadProps> = ({ value, onChange, maxLength = 6, onCompl
     onChange(value.slice(0, -1));
   };
 
+  const handleDeleteAll = () => {
+    onChange('');
+  };
+
   const numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
   return (
@@ -52,10 +56,17 @@ const PINPad: React.FC<PINPadProps> = ({ value, onChange, maxLength = 6, onCompl
             {num}
           </motion.button>
         ))}
-        <div />
+        <motion.button
+          whileTap={{ scale: 0.92 }}
+          onClick={handleDeleteAll}
+          className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-sm text-2xl font-black text-slate-800 flex items-center justify-center hover:bg-slate-50 hover:border-slate-300 active:bg-indigo-50 active:text-indigo-600 transition-all"
+        >
+          C
+        </motion.button>
         <motion.button
           whileTap={{ scale: 0.92 }}
           onClick={() => handleNumber('0')}
+
           className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-sm text-2xl font-black text-slate-800 flex items-center justify-center hover:bg-slate-50 hover:border-slate-300 active:bg-indigo-50 active:text-indigo-600 transition-all"
         >
           0

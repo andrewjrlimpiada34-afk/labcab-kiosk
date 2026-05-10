@@ -37,7 +37,9 @@ const AdminLogin: React.FC = () => {
         return;
       }
 
+      // Ensure admin state flips only after Firestore authz is confirmed
       setIsAdmin(true);
+
       setView('admin-dashboard');
     } catch (err: any) {
       console.error(err);
